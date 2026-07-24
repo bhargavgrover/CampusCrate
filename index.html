@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusCrate — Lost & Found Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#059669; --primary-soft:#d1fae5; --primary-dark:#047857;
+    --secondary:#0891b2; --secondary-soft:#cffafe;
+    --accent:#f59e0b; --accent-soft:#fef3c7;
+    --found:#10b981; --found-soft:#d1fae5;
+    --lost:#ef4444; --lost-soft:#fee2e2;
+    --warning:#f59e0b; --warning-soft:#fef3c7;
+    --error:#ef4444; --error-soft:#fee2e2;
+    --success:#10b981; --success-soft:#d1fae5;
+    --ink:#0f172a; --ink-soft:#475569; --ink-faint:#94a3b8;
+    --bg:#f8fafc; --bg-2:#f1f5f9; --surface:#ffffff;
+    --hairline:#e2e8f0; --border:#cbd5e1;
+    --shadow:0 1px 3px rgba(0,0,0,0.08); --shadow-md:0 4px 12px rgba(0,0,0,0.1); --shadow-lg:0 12px 32px rgba(0,0,0,0.15);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--hairline);}
+  .nav{max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;}
+  .logo{font-size:20px;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px;letter-spacing:-0.02em;}
+  .logo-mark{width:32px;height:32px;border-radius:8px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .nav-spacer{flex:1;}
+  .nav-links{display:flex;gap:24px;align-items:center;}
+  .nav-link{font-size:14px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:color .2s;}
+  .nav-link:hover{color:var(--primary);}
+  .btn{padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(5,150,105,0.3);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--hairline);}
+  .btn-ghost:hover{background:var(--bg-2);color:var(--ink);}
+
+  /* Hero */
+  .hero{max-width:1200px;margin:0 auto;padding:48px 24px 32px;text-align:center;}
+  .hero h1{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin-bottom:12px;}
+  .hero h1 span{color:var(--primary);}
+  .hero p{font-size:18px;color:var(--ink-soft);max-width:560px;margin:0 auto 28px;}
+  .hero-search{display:flex;gap:8px;max-width:560px;margin:0 auto;flex-wrap:wrap;}
+  .hero-search input{flex:1;min-width:200px;padding:14px 18px;border-radius:12px;border:1px solid var(--border);font-family:inherit;font-size:15px;outline:none;transition:border .2s;}
+  .hero-search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+  .hero-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .hero-tag{padding:6px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--hairline);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all .2s;}
+  .hero-tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+
+  /* Stats */
+  .stats-bar{max-width:1200px;margin:0 auto;padding:0 24px 32px;display:flex;gap:16px;flex-wrap:wrap;}
+  .stat-card{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);}
+  .stat-num{font-size:28px;font-weight:800;color:var(--ink);}
+  .stat-label{font-size:13px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
+
+  /* Board */
+  .board-section{max-width:1200px;margin:0 auto;padding:0 24px 80px;}
+  .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .filter-chips{display:flex;gap:6px;background:var(--bg-2);border-radius:10px;padding:4px;}
+  .chip{padding:8px 16px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);transition:all .2s;}
+  .chip.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow);}
+  .chip:hover:not(.active){color:var(--ink);}
+  .spacer{flex:1;}
+  .sort-select{padding:8px 12px;border-radius:8px;border:1px solid var(--hairline);background:var(--surface);font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;outline:none;}
+
+  .cat-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+  .cat-chip{padding:6px 12px;border-radius:8px;border:1px solid var(--hairline);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink-soft);transition:all .2s;}
+  .cat-chip:hover{border-color:var(--primary);}
+  .cat-chip.active{background:var(--primary-soft);color:var(--primary);border-color:var(--primary);}
+
+  .clear-filters{padding:6px 14px;border-radius:8px;border:1px solid var(--hairline);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--lost);transition:all .2s;display:none;align-items:center;gap:4px;}
+  .clear-filters.show{display:inline-flex;}
+  .clear-filters:hover{border-color:var(--lost);background:var(--lost-soft);}
+
+  .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:all .25s cubic-bezier(.22,.61,.36,1);cursor:pointer;display:flex;flex-direction:column;}
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary);}
+  .card-img{width:100%;aspect-ratio:16/10;background:var(--bg-2);overflow:hidden;position:relative;}
+  .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+  .card:hover .card-img img{transform:scale(1.05);}
+  .card-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--ink-faint);}
+  .badge{position:absolute;top:10px;left:10px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;}
+  .badge.lost{background:var(--lost);}
+  .badge.found{background:var(--found);}
+  .badge.claimed{background:var(--ink-faint);}
+  .save-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .save-btn:hover{background:#fff;transform:scale(1.1);}
+  .save-btn.saved{background:var(--accent);color:#fff;}
+  .card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;}
+  .card-title{font-size:15px;font-weight:700;margin-bottom:4px;line-height:1.3;}
+  .card-cat{font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px;}
+  .card-meta{font-size:13px;color:var(--ink-soft);display:flex;flex-direction:column;gap:4px;margin-top:auto;}
+  .card-meta-row{display:flex;align-items:center;gap:6px;}
+  .card-meta-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--ink-soft);}
+  .empty .icon{font-size:48px;margin-bottom:12px;}
+
+  /* Detail modal */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+  .overlay.show{display:flex;animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .modal{background:var(--surface);border-radius:var(--radius);max-width:560px;width:100%;box-shadow:var(--shadow-lg);overflow:hidden;animation:slideUp .3s cubic-bezier(.22,.61,.36,1);}
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .modal-img{width:100%;aspect-ratio:16/9;background:var(--bg-2);overflow:hidden;}
+  .modal-img img{width:100%;height:100%;object-fit:cover;}
+  .modal-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--ink-faint);}
+  .modal-body{padding:24px;}
+  .modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:1;}
+  .modal-close:hover{background:#fff;}
+  .modal-badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;color:#fff;margin-bottom:12px;}
+  .modal h2{font-size:24px;font-weight:800;margin-bottom:8px;}
+  .modal-cat{font-size:14px;color:var(--primary);font-weight:600;margin-bottom:16px;}
+  .modal-meta{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;padding:16px;background:var(--bg-2);border-radius:10px;}
+  .modal-meta-row{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-soft);}
+  .modal-meta-row strong{color:var(--ink);min-width:80px;}
+  .modal-desc{font-size:15px;color:var(--ink-soft);line-height:1.6;margin-bottom:24px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions .btn{flex:1;justify-content:center;}
+
+  /* Form */
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  .form-group input,.form-group select,.form-group textarea{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);font-family:inherit;font-size:14px;outline:none;transition:border .2s;background:var(--surface);color:var(--ink);
+  }
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+  .form-group textarea{resize:vertical;min-height:80px;}
+  .form-row{display:flex;gap:12px;}
+  .form-row .form-group{flex:1;}
+
+  /* Image picker */
+  .img-picker{display:flex;flex-direction:column;gap:10px;}
+  .img-preview{width:100%;height:140px;border-radius:12px;border:2px dashed var(--hairline);background:var(--bg-2);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border .2s;}
+  .img-preview.has-img{border-style:solid;border-color:var(--primary);}
+  .img-preview img{width:100%;height:100%;object-fit:cover;}
+  .img-preview-empty{font-size:13px;color:var(--ink-faint);}
+  .img-picker-tabs{display:flex;gap:6px;background:var(--bg-2);border-radius:10px;padding:4px;}
+  .img-tab{flex:1;padding:8px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);transition:all .2s;}
+  .img-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow);}
+  .img-tab-panel{animation:fadeIn .2s ease;}
+  .img-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .img-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s;background:var(--bg-2);}
+  .img-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .img-thumb:hover{transform:scale(1.04);border-color:var(--primary);}
+  .img-thumb.selected{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+  .img-upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;border-radius:12px;border:2px dashed var(--hairline);background:var(--bg-2);cursor:pointer;text-align:center;font-size:13px;color:var(--ink-soft);transition:all .2s;}
+  .img-upload-zone:hover{border-color:var(--primary);color:var(--primary);}
+  .img-upload-icon{font-size:28px;}
+  .img-clear{align-self:flex-start;background:none;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--lost);padding:4px 0;}
+  .img-clear:hover{text-decoration:underline;}
+
+  /* Activity & Trending */
+  .side-section{max-width:1200px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .side-card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);}
+  .side-card h3{font-size:18px;font-weight:700;margin-bottom:16px;}
+  .activity-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hairline);}
+  .activity-item:last-child{border:none;}
+  .activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .activity-dot.lost{background:var(--lost);}
+  .activity-dot.found{background:var(--found);}
+  .activity-dot.claimed{background:var(--ink-faint);}
+  .activity-text{font-size:14px;color:var(--ink-soft);flex:1;}
+  .activity-text strong{color:var(--ink);}
+  .activity-time{font-size:12px;color:var(--ink-faint);}
+  .trend-item{display:flex;align-items:center;gap:10px;padding:8px 0;}
+  .trend-bar{flex:1;height:8px;border-radius:4px;background:var(--bg-2);overflow:hidden;}
+  .trend-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .5s ease;}
+  .trend-label{font-size:13px;font-weight:600;color:var(--ink-soft);min-width:80px;}
+  .trend-count{font-size:13px;font-weight:700;color:var(--ink);min-width:30px;text-align:right;}
+
+  /* FAB */
+  .fab{position:fixed;bottom:28px;right:28px;width:56px;height:56px;border-radius:50%;border:none;background:var(--primary);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 6px 20px rgba(5,150,105,0.4);z-index:90;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.22,.61,.36,1);}
+  .fab:hover{transform:scale(1.1) rotate(90deg);box-shadow:0 8px 24px rgba(5,150,105,0.5);}
+  .fab:active{transform:scale(0.95);}
+
+  /* Scroll to top */
+  .scroll-top{position:fixed;bottom:96px;right:28px;width:44px;height:44px;border-radius:50%;border:1px solid var(--hairline);background:var(--surface);color:var(--ink);font-size:18px;cursor:pointer;box-shadow:var(--shadow-md);z-index:89;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all .25s;}
+  .scroll-top.show{opacity:1;pointer-events:auto;}
+  .scroll-top:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-2px);}
+
+  /* Toast */
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;z-index:200;opacity:0;transition:all .3s cubic-bezier(.22,.61,.36,1);box-shadow:var(--shadow-lg);pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+  .toast.ok{background:var(--found);color:#fff;}
+
+  /* Footer */
+  footer{max-width:1200px;margin:0 auto;padding:32px 24px;border-top:1px solid var(--hairline);text-align:center;color:var(--ink-faint);font-size:13px;}
+
+  /* Responsive */
+  @media(max-width:768px){
+    .nav-links{display:none;}
+    .hero{padding:32px 16px 24px;}
+    .stats-bar{padding:0 16px 24px;}
+    .board-section{padding:0 16px 80px;}
+    .side-section{grid-template-columns:1fr;padding:0 16px 40px;}
+    .hero-search{flex-direction:column;}
+    .form-row{flex-direction:column;}
+    .img-gallery{grid-template-columns:repeat(3,1fr);}
+    .fab{bottom:20px;right:20px;}
+    .toolbar{flex-direction:column;align-items:stretch;}
+    .filter-chips{overflow-x:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo"><span class="logo-mark">CC</span> CampusCrate</div>
+    <div class="nav-spacer"></div>
+    <nav class="nav-links">
+      <a class="nav-link" href="#board">Browse</a>
+      <a class="nav-link" href="#activity">Activity</a>
+      <a class="nav-link" href="#trending">Trending</a>
+    </nav>
+    <button class="btn btn-primary" onclick="openForm()">+ Post Item</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Lost something? <span>Found something?</span></h1>
+  <p>CampusCrate is your campus lost & found board. Post items, search by keyword, and help reunite people with their stuff.</p>
+  <div class="hero-search">
+    <input id="hero-search" placeholder="Search for keys, wallet, jacket..." type="text" />
+    <button class="btn btn-primary" id="hero-search-btn">Search</button>
+  </div>
+  <div class="hero-tags">
+    <span class="hero-tag" data-quick="keys">Keys</span>
+    <span class="hero-tag" data-quick="wallet">Wallet</span>
+    <span class="hero-tag" data-quick="phone">Phone</span>
+    <span class="hero-tag" data-quick="jacket">Jacket</span>
+    <span class="hero-tag" data-quick="laptop">Laptop</span>
+    <span class="hero-tag" data-quick="bottle">Water bottle</span>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Items</div></div>
+  <div class="stat-card"><div class="stat-num" id="stat-lost">0</div><div class="stat-label">Lost</div></div>
+  <div class="stat-card"><div class="stat-num" id="stat-found">0</div><div class="stat-label">Found</div></div>
+  <div class="stat-card"><div class="stat-num" id="stat-claimed">0</div><div class="stat-label">Claimed</div></div>
+</div>
+
+<section class="board-section" id="board">
+  <div class="toolbar">
+    <div class="filter-chips" id="filter-chips">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="lost">Lost</button>
+      <button class="chip" data-filter="found">Found</button>
+      <button class="chip" data-filter="claimed">Claimed</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="clear-filters" id="clear-filters">✕ Clear filters</button>
+    <select class="sort-select" id="sort-select">
+      <option value="recent">Most Recent</option>
+      <option value="oldest">Oldest First</option>
+      <option value="title">Title A-Z</option>
+    </select>
+  </div>
+  <div class="cat-chips" id="cat-chips"></div>
+  <div class="board" id="board-grid"></div>
+</section>
+
+<section class="side-section" id="activity">
+  <div class="side-card">
+    <h3>Recent Activity</h3>
+    <div id="activity-list"></div>
+  </div>
+  <div class="side-card" id="trending">
+    <h3>Trending Categories</h3>
+    <div id="trending-list"></div>
+  </div>
+</section>
+
+<footer>
+  CampusCrate — Campus Lost & Found Board
+</footer>
+
+<!-- Detail Modal -->
+<div class="overlay" id="detail-overlay">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeDetail()">✕</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- Post Form Modal -->
+<div class="overlay" id="form-overlay">
+  <div class="modal" style="position:relative;max-width:520px;">
+    <button class="modal-close" id="form-close">✕</button>
+    <div class="modal-body">
+      <h2 style="margin-bottom:20px;">Post an Item</h2>
+      <form id="post-form">
+        <div class="form-group">
+          <label>Type</label>
+          <select id="f-type" required>
+            <option value="lost">I lost something</option>
+            <option value="found">I found something</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input id="f-title" placeholder="e.g. Black leather wallet" required type="text" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="f-category" required>
+              <option value="Electronics">Electronics</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Accessories">Accessories</option>
+              <option value="Keys">Keys</option>
+              <option value="Bags">Bags</option>
+              <option value="Books">Books</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input id="f-location" placeholder="e.g. Library 2nd floor" required type="text" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="f-desc" placeholder="Add details: color, brand, distinguishing features..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image (optional)</label>
+          <div class="img-picker">
+            <div class="img-preview" id="img-preview"><span class="img-preview-empty">No image selected — pick one below</span></div>
+            <div class="img-picker-tabs">
+              <button type="button" class="img-tab active" data-img-tab="gallery">Gallery</button>
+              <button type="button" class="img-tab" data-img-tab="upload">Upload from device</button>
+            </div>
+            <div class="img-tab-panel" id="img-gallery-panel"><div class="img-gallery" id="img-gallery"></div></div>
+            <div class="img-tab-panel" id="img-upload-panel" style="display:none;">
+              <label class="img-upload-zone" for="f-img-file">
+                <span class="img-upload-icon">📁</span>
+                <span>Click to choose a photo from your phone or computer</span>
+                <input type="file" id="f-img-file" accept="image/*" hidden />
+              </label>
+            </div>
+            <button type="button" class="img-clear" id="img-clear">Remove image</button>
+          </div>
+          <input type="hidden" id="f-img" />
+        </div>
+        <div class="form-group">
+          <label>Contact (optional)</label>
+          <input id="f-contact" placeholder="Email or phone" type="text" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;">Post to Board</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="scroll-top" id="scroll-top">↑</button>
+<button class="fab" id="fab" title="Post an item">+</button>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const GALLERY_IMAGES = [
+  'https://images.pexels.com/photos/2076622/pexels-photo-2076622.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/4362267/pexels-photo-4362267.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/1438171/pexels-photo-1438171.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/1630643/pexels-photo-1630643.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/6214750/pexels-photo-6214750.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/261817/pexels-photo-261817.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=400',
+  'https://images.pexels.com/photos/29090/pexels-photo-29090.jpg?auto=compress&cs=tinysrgb&w=400',
+];
+
+const SEED_ITEMS = [
+  {id:'s1',type:'lost',title:'Black leather wallet',category:'Accessories',location:'Library 2nd floor',description:'Brown leather wallet with cards and student ID inside. Very important to me.',image:'https://images.pexels.com/photos/2076622/pexels-photo-2076622.jpeg?auto=compress&cs=tinysrgb&w=400',contact:'alex@email.com',status:'active',date:Date.now()-86400000*2,saved:false},
+  {id:'s2',type:'found',title:'Blue water bottle',category:'Other',location:'Gym locker room',description:'Found a blue Hydro Flask water bottle left behind in the gym.',image:'https://images.pexels.com/photos/1438171/pexels-photo-1438171.jpeg?auto=compress&cs=tinysrgb&w=400',contact:'sam@email.com',status:'active',date:Date.now()-86400000*1,saved:false},
+  {id:'s3',type:'lost',title:'Apple AirPods case',category:'Electronics',location:'Cafeteria',description:'White AirPods Pro case, no earbuds inside. Lost during lunch.',image:'https://images.pexels.com/photos/1630643/pexels-photo-1630643.jpeg?auto=compress&cs=tinysrgb&w=400',contact:'casey@email.com',status:'active',date:Date.now()-3600000*5,saved:false},
+  {id:'s4',type:'found',title:'Set of keys with lanyard',category:'Keys',location:'Parking lot B',description:'Found a set of keys on a blue lanyard near parking lot B.',image:'https://images.pexels.com/photos/261817/pexels-photo-261817.jpeg?auto=compress&cs=tinysrgb&w=400',contact:'jordan@email.com',status:'active',date:Date.now()-3600000*12,saved:false},
+  {id:'s5',type:'lost',title:'Gray hoodie',category:'Clothing',location:'Science building',description:'Left my gray hoodie in Science building room 204. Has a small logo on front.',image:'https://images.pexels.com/photos/4362267/pexels-photo-4362267.jpeg?auto=compress&cs=tinysrgb&w=400',contact:'taylor@email.com',status:'active',date:Date.now()-86400000*3,saved:false},
+  {id:'s6',type:'found',title:'Laptop charger',category:'Electronics',location:'Study lounge',description:'Found a laptop charger left plugged in at the study lounge.',image:'',contact:'morgan@email.com',status:'active',date:Date.now()-3600000*8,saved:false},
+  {id:'s7',type:'lost',title:'Prescription glasses',category:'Accessories',location:'Lecture hall A',description:'Black framed prescription glasses. Lost during morning lecture.',image:'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=400',contact:'lee@email.com',status:'claimed',date:Date.now()-86400000*5,saved:false},
+];
+
+const state = {
+  items: [],
+  filter: 'all',
+  sort: 'recent',
+  search: '',
+  category: 'all',
+};
+
+function loadItems(){
+  try{
+    const saved = localStorage.getItem('campuscrate_items');
+    if(saved){ state.items = JSON.parse(saved); return; }
+  }catch(e){}
+  state.items = [...SEED_ITEMS];
+  saveItems();
+}
+function saveItems(){
+  try{ localStorage.setItem('campuscrate_items', JSON.stringify(state.items)); }catch(e){}
+}
+function isSaved(id){ return state.items.find(i=>i.id===id)?.saved; }
+function toggleSave(id){ const it = state.items.find(i=>i.id===id); if(it){ it.saved = !it.saved; saveItems(); } }
+
+function timeAgo(ts){
+  const diff = Date.now() - ts;
+  const h = Math.floor(diff/3600000);
+  const d = Math.floor(h/24);
+  if(d>0) return d+'d ago';
+  if(h>0) return h+'h ago';
+  const m = Math.floor(diff/60000);
+  if(m>0) return m+'m ago';
+  return 'just now';
+}
+
+function getFilteredItems(){
+  let items = [...state.items];
+  if(state.filter==='lost') items = items.filter(i=>i.type==='lost' && i.status!=='claimed');
+  else if(state.filter==='found') items = items.filter(i=>i.type==='found' && i.status!=='claimed');
+  else if(state.filter==='claimed') items = items.filter(i=>i.status==='claimed');
+
+  if(state.category!=='all') items = items.filter(i=>i.category===state.category);
+  if(state.search){
+    const q = state.search.toLowerCase();
+    items = items.filter(i=>i.title.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)||i.location.toLowerCase().includes(q));
+  }
+
+  if(state.sort==='recent') items.sort((a,b)=>b.date-a.date);
+  else if(state.sort==='oldest') items.sort((a,b)=>a.date-b.date);
+  else if(state.sort==='title') items.sort((a,b)=>a.title.localeCompare(b.title));
+  return items;
+}
+
+function renderStats(){
+  const items = state.items;
+  $('stat-total').textContent = items.length;
+  $('stat-lost').textContent = items.filter(i=>i.type==='lost').length;
+  $('stat-found').textContent = items.filter(i=>i.type==='found').length;
+  $('stat-claimed').textContent = items.filter(i=>i.status==='claimed').length;
+}
+
+function renderBoard(){
+  const items = getFilteredItems();
+  if(items.length===0){
+    $('board-grid').innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="icon">📭</div><p>No items match your filters.</p><button class="btn btn-ghost" data-action="clear" style="margin-top:12px;">Clear all filters</button></div>';
+    return;
+  }
+  $('board-grid').innerHTML = items.map(i=>{
+    const status = i.status==='claimed' ? 'claimed' : i.type;
+    return `<div class="card" data-action="view" data-id="${esc(i.id)}">
+      <div class="card-img">
+        ${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;card-img-placeholder&quot;>📦</div>'">` : '<div class="card-img-placeholder">📦</div>'}
+        <span class="badge ${status}">${esc(status)}</span>
+        <button class="save-btn ${i.saved?'saved':''}" data-action="save" data-id="${esc(i.id)}" onclick="event.stopPropagation()">${i.saved?'★':'☆'}</button>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(i.title)}</div>
+        <div class="card-cat">${esc(i.category)}</div>
+        <div class="card-meta">
+          <div class="card-meta-row">📍 <span>${esc(i.location)}</span></div>
+          <div class="card-meta-row">🕐 <span>${timeAgo(i.date)}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderActivity(){
+  const items = [...state.items].sort((a,b)=>b.date-a.date).slice(0,6);
+  if(items.length===0){ $('activity-list').innerHTML = '<p style="color:var(--ink-faint);font-size:14px;">No activity yet.</p>'; return; }
+  $('activity-list').innerHTML = items.map(i=>{
+    const status = i.status==='claimed' ? 'claimed' : i.type;
+    return `<div class="activity-item">
+      <div class="activity-dot ${status}"></div>
+      <div class="activity-text"><strong>${esc(i.title)}</strong> — ${esc(i.location)}</div>
+      <div class="activity-time">${timeAgo(i.date)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTrending(){
+  const counts = {};
+  state.items.forEach(i=>{ counts[i.category] = (counts[i.category]||0)+1; });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(sorted.length===0){ $('trending-list').innerHTML = '<p style="color:var(--ink-faint);font-size:14px;">No data yet.</p>'; return; }
+  const max = sorted[0][1];
+  $('trending-list').innerHTML = sorted.map(([cat,count])=>
+    `<div class="trend-item"><div class="trend-label">${esc(cat)}</div><div class="trend-bar"><div class="trend-fill" style="width:${count/max*100}%"></div></div><div class="trend-count">${count}</div></div>`
+  ).join('');
+}
+
+function renderCategoryChips(){
+  const cats = [...new Set(state.items.map(i=>i.category))].sort();
+  $('cat-chips').innerHTML = ['all', ...cats].map(c=>
+    `<button class="cat-chip ${state.category===c?'active':''}" data-cat="${esc(c)}">${c==='all'?'All Categories':esc(c)}</button>`
+  ).join('');
+}
+
+function updateClearFilters(){
+  const show = state.search || state.category!=='all' || state.filter!=='all';
+  $('clear-filters').classList.toggle('show', !!show);
+}
+
+function clearAllFilters(){
+  state.search=''; state.category='all'; state.filter='all';
+  $('hero-search').value='';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active', c.dataset.filter==='all'));
+  renderCategoryChips(); renderBoard(); updateClearFilters();
+}
+
+function renderAll(){ renderStats(); renderBoard(); renderActivity(); renderTrending(); renderCategoryChips(); updateClearFilters(); }
+
+function openDetail(id){
+  const item = state.items.find(i=>i.id===id);
+  if(!item) return;
+  const status = item.status==='claimed' ? 'claimed' : item.type;
+  $('detail-content').innerHTML = `
+    <div class="modal-img">${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.title)}">` : '<div class="modal-img-placeholder">📦</div>'}</div>
+    <div class="modal-body">
+      <span class="modal-badge badge ${status}" style="background:var(--${status==='lost'?'lost':status==='found'?'found':'ink-faint'});">${esc(status)}</span>
+      <h2>${esc(item.title)}</h2>
+      <div class="modal-cat">${esc(item.category)}</div>
+      <div class="modal-meta">
+        <div class="modal-meta-row"><strong>Location:</strong> ${esc(item.location)}</div>
+        <div class="modal-meta-row"><strong>Posted:</strong> ${timeAgo(item.date)}</div>
+        ${item.contact ? `<div class="modal-meta-row"><strong>Contact:</strong> ${esc(item.contact)}</div>` : ''}
+      </div>
+      ${item.description ? `<div class="modal-desc">${esc(item.description)}</div>` : ''}
+      <div class="modal-actions">
+        ${item.status!=='claimed' ? `<button class="btn btn-primary" onclick="markClaimed('${esc(item.id)}')">Mark as Claimed</button>` : '<button class="btn btn-ghost" disabled>Already Claimed</button>'}
+        <button class="btn btn-ghost" onclick="toggleSave('${esc(item.id)}');openDetail('${esc(item.id)}');">${item.saved?'★ Saved':'☆ Save'}</button>
+      </div>
+    </div>`;
+  $('detail-overlay').classList.add('show');
+}
+function closeDetail(){ $('detail-overlay').classList.remove('show'); }
+
+function markClaimed(id){
+  const item = state.items.find(i=>i.id===id);
+  if(item){ item.status='claimed'; saveItems(); renderAll(); closeDetail(); toast('Item marked as claimed!','ok'); }
+}
+
+function openForm(){ $('form-overlay').classList.add('show'); }
+
+function setPickedImage(url){
+  $('f-img').value = url || '';
+  const prev = $('img-preview');
+  if(url){
+    prev.classList.add('has-img');
+    prev.innerHTML = `<img src="${esc(url)}" alt="Selected image">`;
+    document.querySelectorAll('.img-thumb').forEach(t=>t.classList.toggle('selected', t.dataset.src===url));
+  } else {
+    prev.classList.remove('has-img');
+    prev.innerHTML = '<span class="img-preview-empty">No image selected — pick one below</span>';
+    document.querySelectorAll('.img-thumb').forEach(t=>t.classList.remove('selected'));
+  }
+}
+
+function renderGallery(){
+  $('img-gallery').innerHTML = GALLERY_IMAGES.map(src=>
+    `<div class="img-thumb" data-src="${esc(src)}"><img src="${esc(src)}" alt="Gallery option" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+  ).join('');
+}
+
+function switchImgTab(tab){
+  document.querySelectorAll('.img-tab').forEach(t=>t.classList.toggle('active', t.dataset.imgTab===tab));
+  $('img-gallery-panel').style.display = tab==='gallery' ? '' : 'none';
+  $('img-upload-panel').style.display = tab==='upload' ? '' : 'none';
+}
+
+function resetImgPicker(){ setPickedImage(''); const f=$('f-img-file'); if(f) f.value=''; }
+
+function processUpload(file, cb){
+  if(file.size>8*1024*1024){ toast('Image too large (max 8MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 800; let w = img.width, h = img.height;
+      if(w > h && w > max){ h = h*max/w; w = max; }
+      else if(h > max){ w = w*max/h; h = max; }
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function closeForm(){ $('form-overlay').classList.remove('show'); $('post-form').reset(); resetImgPicker(); }
+
+function toast(msg,type){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type?' '+type:'');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  loadItems();
+  renderAll();
+
+  $('post-form').addEventListener('submit',e=>{
+    e.preventDefault();
+    const item = {
+      id: 'i'+Date.now(),
+      type: $('f-type').value,
+      title: $('f-title').value.trim(),
+      category: $('f-category').value,
+      location: $('f-location').value.trim(),
+      description: $('f-desc').value.trim(),
+      image: $('f-img').value,
+      contact: $('f-contact').value.trim(),
+      status: 'active',
+      date: Date.now(),
+      saved: false,
+    };
+    state.items.unshift(item);
+    saveItems(); closeForm(); renderAll();
+    toast('Item posted to the board!','ok');
+    document.querySelector('.board-section').scrollIntoView({behavior:'smooth'});
+  });
+
+  $('form-close').addEventListener('click',closeForm);
+  $('detail-overlay').addEventListener('click',e=>{ if(e.target===$('detail-overlay')) closeDetail(); });
+  $('form-overlay').addEventListener('click',e=>{ if(e.target===$('form-overlay')) closeForm(); });
+
+  renderGallery();
+  document.querySelectorAll('.img-tab').forEach(t=>t.addEventListener('click',()=>switchImgTab(t.dataset.imgTab)));
+  $('img-gallery').addEventListener('click',e=>{ const th=e.target.closest('.img-thumb'); if(!th) return; setPickedImage(th.dataset.src); });
+  $('f-img-file').addEventListener('change',e=>{ const file=e.target.files[0]; if(!file) return; processUpload(file, setPickedImage); });
+  $('img-clear').addEventListener('click',resetImgPicker);
+
+  $('filter-chips').addEventListener('click',e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    state.filter = chip.dataset.filter;
+    renderBoard(); updateClearFilters();
+  });
+
+  $('sort-select').addEventListener('change',e=>{ state.sort = e.target.value; renderBoard(); });
+  $('fab').addEventListener('click',openForm);
+  $('scroll-top').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  window.addEventListener('scroll',()=>{ $('scroll-top').classList.toggle('show',window.scrollY>400); },{passive:true});
+  $('cat-chips').addEventListener('click',e=>{ const chip=e.target.closest('.cat-chip'); if(!chip) return; state.category=chip.dataset.cat; renderCategoryChips(); renderBoard(); updateClearFilters(); });
+  $('clear-filters').addEventListener('click',clearAllFilters);
+
+  $('hero-search').addEventListener('input',e=>{ state.search = e.target.value; renderBoard(); updateClearFilters(); });
+  $('hero-search-btn').addEventListener('click',()=>{ state.search = $('hero-search').value; renderBoard(); updateClearFilters(); document.querySelector('.board-section').scrollIntoView({behavior:'smooth'}); });
+  document.querySelectorAll('.hero-tag').forEach(t=>t.addEventListener('click',()=>{ $('hero-search').value = t.dataset.quick; state.search = t.dataset.quick; renderBoard(); updateClearFilters(); document.querySelector('.board-section').scrollIntoView({behavior:'smooth'}); }));
+
+  $('board-grid').addEventListener('click',e=>{
+    const btn = e.target.closest('[data-action]'); if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action==='clear'){ clearAllFilters(); return; }
+    if(btn.dataset.action==='save'){ e.stopPropagation(); toggleSave(id); renderAll(); toast(isSaved(id)?'Saved':'Removed'); return; }
+    if(btn.dataset.action==='view'){ openDetail(id); }
+  });
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ closeDetail(); closeForm(); }
+  });
+});
+</script>
+</body>
+</html>
