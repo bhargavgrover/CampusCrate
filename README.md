@@ -14,4 +14,4 @@
 
 ![Image alt](https://github.com/bhargavgrover/CampusCrate/blob/00f91f557d68d520202d70e39d9d2c927f9222de/Screenshot%202026-07-24%20144021.png)
 ![Image alt](https://github.com/bhargavgrover/CampusCrate/blob/f541cff64c93329b8a7b2a6f7ffbfb4d315dd7cc/Screenshot%202026-07-24%20144121.png)
-![Image alt](https://github.com/bhargavgrover/CampusCrate/blob/76536c68daeb5736ca3790e2c64a8913e33f10fc/Screenshot%202026-07-24%20144154.png)
+![Image alt]()
