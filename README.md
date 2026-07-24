@@ -12,6 +12,6 @@
 * 📱 **Mobile-Friendly UI:** Designed for smooth use on phones, tablets, and desktop computers.
 * ⚡ **Zero Backend Setup:** Runs cleanly as a static web app using browser local storage.
 
+![Image alt](https://github.com/bhargavgrover/CampusCrate/blob/00f91f557d68d520202d70e39d9d2c927f9222de/Screenshot%202026-07-24%20144021.png)
 ![Image alt]()
-
-
+![Image alt]()
