@@ -13,5 +13,5 @@
 * ⚡ **Zero Backend Setup:** Runs cleanly as a static web app using browser local storage.
 
 ![Image alt](https://github.com/bhargavgrover/CampusCrate/blob/00f91f557d68d520202d70e39d9d2c927f9222de/Screenshot%202026-07-24%20144021.png)
-![Image alt]()
+![Image alt](https://github.com/bhargavgrover/CampusCrate/blob/f541cff64c93329b8a7b2a6f7ffbfb4d315dd7cc/Screenshot%202026-07-24%20144121.png)
 ![Image alt]()
